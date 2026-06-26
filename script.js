@@ -1,4 +1,4 @@
-/*   DATA   */
+/* ============ DATA ============ */
 const RESOURCES = [
 {id:'R01',name:'Room A1',type:'room',capacity:4,status:'available',floor:'1F',features:'Whiteboard, TV'},
 {id:'R02',name:'Room A2',type:'room',capacity:6,status:'occupied',floor:'1F',features:'Projector, Whiteboard'},
@@ -66,7 +66,7 @@ let currentRole = 'student';
 let isDark = false;
 let studentCalState = {year:2026,month:5,selected:null};
 let staffCalState   = {year:2026,month:5,selected:null};
-/*   LOGIN   */
+/* ============ LOGIN ============ */
 function selectRole(role, btn) {
 currentRole = role;
 document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
@@ -121,7 +121,7 @@ if (activePage) {
     doLogout();
 }
 }
-/*   NAVIGATION   */
+/* ============ NAVIGATION ============ */
 function navToPanel(role, panel, sidebarItemEl) {
 document.querySelectorAll('#page-'+role+' .panel').forEach(p => p.classList.remove('active'));
 const t = document.getElementById(role+'-panel-'+panel);
@@ -136,7 +136,7 @@ if (sidebarItemEl) {
 closeSidebar();
 closeDropdowns();
 }
-/*   SIDEBAR   */
+/* ============ SIDEBAR ============ */
 function toggleSidebar(role) {
 const sb = document.getElementById(role+'-sidebar');
 const ov = document.getElementById(role+'-sidebar-overlay');
@@ -151,7 +151,7 @@ if (sb) sb.classList.remove('open');
 if (ov) ov.classList.remove('open');
 });
 }
-/*   PROFILE DROPDOWN   */
+/* ============ PROFILE DROPDOWN ============ */
 function toggleProfileDropdown(id) {
 const dd = document.getElementById(id);
 const isOpen = dd.classList.contains('open');
@@ -164,7 +164,7 @@ document.querySelectorAll('.profile-dropdown').forEach(d => d.classList.remove('
 document.addEventListener('click', e => {
 if (!e.target.closest('.nav-profile') && !e.target.closest('.notif-btn')) closeDropdowns();
 });
-/*   DARK MODE   */
+/* ============ DARK MODE ============ */
 function toggleDarkMode(checkbox) {
 isDark = checkbox.checked;
 document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -177,14 +177,14 @@ const el = document.getElementById(id);
 if (el) el.checked = isDark;
 });
 }
-/*   INIT   */
+/* ============ INIT ============ */
 function initDashboard() {
 if (currentRole === 'student') initStudentDashboard();
 else if (currentRole === 'staff') initStaffDashboard();
 else initAdminDashboard();
 syncDarkToggles();
 }
-/*   STUDENT   */
+/* ============ STUDENT ============ */
 function initStudentDashboard() {
 const d = document.getElementById('res-date');
 if (d) d.valueAsDate = new Date();
@@ -402,7 +402,7 @@ if (!el) return;
 el.innerHTML = issues.length ? issues.map(i=> `<div class="issue-item"> <strong>${i.resource} — ${i.type}</strong> <p>${i.desc}</p> <span>${i.time}</span> </div>`).join('') : '<div style="text-align:center;padding:40px;color:var(--text-muted);">No issues reported</div>';
 }
 function saveAccount() { showToast('Profile updated successfully','success'); }
-/*   CALENDAR   */
+/* ============ CALENDAR ============ */
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 function buildCalendar(containerId, state, getEventsForDate, onDateClick) {
@@ -550,7 +550,7 @@ tb.innerHTML = filtered.map(r=>`
      </tr>
 `).join('');
 }
-/*   STAFF   */
+/* ============ STAFF ============ */
 function initStaffDashboard() {
 renderStaffActivity();
 renderOverdue();
@@ -648,7 +648,7 @@ if (direction==='in') resource.status='occupied'; else resource.status='availabl
 renderStaffActivity();
 showToast(`${direction==='in'?'Checked in':'Checked out'}: ${resource.name} for ${sid}`,direction==='in'?'success':'warn');
 }
-/*   ADMIN   */
+/* ============ ADMIN ============ */
 function initAdminDashboard() {
 renderCharts();
 renderWaitlistPreview();
@@ -726,7 +726,7 @@ renderWaitlistPreview();
 }
 function savePrioritySettings() { showToast('Priority weights applied!','success'); }
 function saveFairUsage() { showToast('Fair usage policy updated!','success'); }
-/*   MODAL   */
+/* ============ MODAL ============ */
 function openModal(title, bodyHTML, footerHTML) {
 document.getElementById('modal-title').textContent = title;
 document.getElementById('modal-body').innerHTML = bodyHTML;
@@ -739,7 +739,7 @@ document.getElementById('modal-backdrop').classList.remove('open');
 document.getElementById('modal-backdrop').addEventListener('click', function(e) {
 if (e.target===this) closeModal();
 });
-/*   TOAST   */
+/* ============ TOAST ============ */
 function showToast(msg, type='') {
 const c = document.getElementById('toast-container');
 const t = document.createElement('div');
@@ -760,7 +760,7 @@ setTimeout(()=>{
 },3200);
 }
 
-/*   ✨ ENHANCEMENT HELPERS   */
+/* ============ ✨ ENHANCEMENT HELPERS ============ */
 function animateCountUp() {
   document.querySelectorAll('.stat-card-val').forEach(el => {
     const text = el.textContent.trim();
@@ -821,7 +821,7 @@ function startLiveClock() {
   setInterval(update, 30000);
 }
 
-/*   INIT   */
+/* ============ INIT ============ */
 window.addEventListener('DOMContentLoaded',()=>{
 const today = new Date().toISOString().split('T')[0];
 document.querySelectorAll('input[type=date]').forEach(d => d.value=today);
