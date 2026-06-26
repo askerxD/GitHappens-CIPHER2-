@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veritas — Library Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div id="modal-backdrop" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Title</h3>
+                <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-body" class="modal-body">Body</div>
+            <div id="modal-footer" class="modal-footer">Footer</div>
+        </div>
+    </div>
+
+    <!--   LOGIN PAGE   -->
+    <div id="page-login" class="page active">
+        <div class="login-wrap">
+            <div class="login-hero">
+                <div class="login-logo"><i class="fa-solid fa-book-open-reader"></i> <span>Veritas</span></div>
+                <div>
+                    <h1>Your library, reimagined.</h1>
+                    <p>A centralized digital platform for study space reservations, equipment loans, and real-time resource management.</p>
+                </div>
+                <div class="login-hero-stats">
+                    <div class="login-hero-stat"><div class="login-hero-stat-val">48</div><div class="login-hero-stat-lbl">Study Rooms</div></div>
+                    <div class="login-hero-stat"><div class="login-hero-stat-val">120</div><div class="login-hero-stat-lbl">Devices</div></div>
+                    <div class="login-hero-stat"><div class="login-hero-stat-val">2.4k</div><div class="login-hero-stat-lbl">Students</div></div>
+                </div>
+            </div>
+            <div class="login-form-wrap">
+                <h2>Welcome back</h2>
+                <p>Select your role and enter your credentials</p>
+                <div class="role-buttons">
+                    <button class="role-btn active" onclick="selectRole('student', this)"><i class="fa-solid fa-graduation-cap"></i> Student</button>
+                    <button class="role-btn" onclick="selectRole('staff', this)"><i class="fa-solid fa-user-tie"></i> Staff</button>
+                    <button class="role-btn" onclick="selectRole('admin', this)"><i class="fa-solid fa-user-gear"></i> Admin</button>
+                </div>
+                <form onsubmit="event.preventDefault(); doLogin();">
+                    <div class="form-group"><label class="form-label">University ID</label><input type="text" id="login-user" class="form-control" placeholder="e.g. STU2024001" required></div>
+                    <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-control" placeholder="••••••••" value="password"></div>
+                    <button type="submit" class="login-submit">Sign in <i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+                <p class="login-hint">Demo: any credentials work. Choose a role and sign in.</p>
+            </div>
+        </div>
+    </div>
+
+    <!--   STUDENT PAGE   -->
+    <div id="page-student" class="page">
+        <nav class="navbar">
+            <button class="nav-sidebar-toggle" onclick="toggleSidebar('student')"><i class="fa-solid fa-bars"></i></button>
+            <div class="navbar-brand"><i class="fa-solid fa-book-open-reader"></i> <span>Veritas</span> LMS</div>
+            <div class="navbar-spacer"></div>
+            <div class="nav-actions">
+                <button class="notif-btn" onclick="toggleProfileDropdown('student-notif-dropdown')"><i class="fa-regular fa-bell"></i><span class="notif-badge" id="student-notif-count">3</span></button>
+                <div class="profile-dropdown" id="student-notif-dropdown">
+                    <div class="profile-dropdown-header"><strong>Notifications</strong></div>
+                    <div id="student-notif-list" class="notif-list-dropdown"></div>
+                </div>
+                <div class="nav-profile">
+                    <button class="nav-profile-btn" onclick="toggleProfileDropdown('student-profile-dropdown')">
+                        <div class="nav-avatar">KM</div><span class="nav-name">Kavya M.</span><i class="fa-solid fa-chevron-down nav-profile-caret"></i>
+                    </button>
+                    <div class="profile-dropdown" id="student-profile-dropdown">
+                        <div class="profile-dropdown-header"><div class="profile-dropdown-name">Kavya Menon</div><div class="profile-dropdown-role">Student · STU2024001</div></div>
+                        <button class="profile-dropdown-item" onclick="navToPanel('student','account')"><i class="fa-regular fa-user"></i> Account Center</button>
+                        <button class="profile-dropdown-item" onclick="navToPanel('student','settings')"><i class="fa-solid fa-gear"></i> Settings</button>
+                        <div class="profile-dropdown-divider"></div>
+                        <button class="profile-dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="dashboard-shell">
+            <aside id="student-sidebar" class="sidebar">
+                <div class="sidebar-section"><div class="sidebar-label">Main</div>
+                    <a class="sidebar-item active" data-panel="overview" onclick="navToPanel('student','overview',this)"><i class="fa-solid fa-grid-2 sidebar-icon"></i> Overview</a>
+                    <a class="sidebar-item" data-panel="availability" onclick="navToPanel('student','availability',this)"><i class="fa-solid fa-magnifying-glass sidebar-icon"></i> Availability</a>
+                    <a class="sidebar-item" data-panel="reservations" onclick="navToPanel('student','reservations',this)"><i class="fa-regular fa-calendar sidebar-icon"></i> Reservations</a>
+                    <a class="sidebar-item" data-panel="qr" onclick="navToPanel('student','qr',this)"><i class="fa-solid fa-qrcode sidebar-icon"></i> QR Check-In/Out</a>
+                </div>
+                <div class="sidebar-section"><div class="sidebar-label">Support</div>
+                    <a class="sidebar-item" data-panel="notifications" onclick="navToPanel('student','notifications',this)"><i class="fa-regular fa-bell sidebar-icon"></i> Notifications</a>
+                    <a class="sidebar-item" data-panel="issues" onclick="navToPanel('student','issues',this)"><i class="fa-solid fa-triangle-exclamation sidebar-icon"></i> Report Issue</a>
+                </div>
+                <div class="sidebar-section"><div class="sidebar-label">Account</div>
+                    <a class="sidebar-item" data-panel="account" onclick="navToPanel('student','account',this)"><i class="fa-regular fa-user sidebar-icon"></i> Account Center</a>
+                    <a class="sidebar-item" data-panel="settings" onclick="navToPanel('student','settings',this)"><i class="fa-solid fa-sliders sidebar-icon"></i> Settings</a>
+                </div>
+            </aside>
+            <div id="student-sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+            <main class="main-content">
+                <!-- Overview -->
+                <section id="student-panel-overview" class="panel active">
+                    <div class="page-header"><div class="page-header-left"><h2>Welcome back, Kavya 👋</h2><p>Thursday, 25 June 2026 · University Library</p></div><button class="btn btn-primary" onclick="navToPanel('student','reservations')"><i class="fa-solid fa-plus"></i> New Reservation</button></div>
+                    <div class="cards-grid">
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#E85547;"><i class="fa-solid fa-door-open"></i></div><div class="stat-card-val" id="s-avail-rooms">12</div><div class="stat-card-label">Rooms Available</div><div class="stat-card-sub"><i class="fa-solid fa-arrow-up"></i> 3 from yesterday</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#2e7d52;"><i class="fa-solid fa-laptop"></i></div><div class="stat-card-val" id="s-avail-laptops">8</div><div class="stat-card-label">Laptops Available</div><div class="stat-card-sub"><i class="fa-solid fa-arrow-up"></i> 2 from yesterday</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#c97b22;"><i class="fa-solid fa-calculator"></i></div><div class="stat-card-val" id="s-avail-calc">5</div><div class="stat-card-label">Calculators Available</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#b93025;"><i class="fa-solid fa-clock"></i></div><div class="stat-card-val">2</div><div class="stat-card-label">Active Bookings</div><div class="stat-card-sub" style="color:#b93025;">1 due today</div></div>
+                    </div>
+                    <div class="section-card"><div class="section-card-header"><h3>My Current Reservations</h3><button class="btn btn-ghost btn-sm">See all</button></div><div class="section-card-body table-wrap"><table><thead><tr><th>Resource</th><th>Type</th><th>Time Slot</th><th>Status</th><th>Action</th></tr></thead><tbody id="my-reservations-body"></tbody></table></div></div>
+                </section>
+
+                <!-- Availability -->
+                <section id="student-panel-availability" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Resource Availability</h2><p>Real-time status of all library resources</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <div class="filter-group">
+                                <select id="filter-type" class="form-control form-select" onchange="filterResources()"><option value="all">All Types</option><option value="room">Study Rooms</option><option value="laptop">Laptops</option><option value="calculator">Calculators</option></select>
+                                <select id="filter-status" class="form-control form-select" onchange="filterResources()"><option value="all">All Status</option><option value="available">Available</option><option value="occupied">Occupied</option><option value="waitlist">Waitlist</option></select>
+                            </div>
+                        </div>
+                        <div class="section-card-body"><div id="resource-grid" class="resource-grid"></div></div>
+                    </div>
+                </section>
+
+                <!-- Reservations -->
+                <section id="student-panel-reservations" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Reservations</h2><p>Book a resource or browse your history</p></div></div>
+                    <div class="grid-2">
+                        <div class="section-card">
+                            <div class="section-card-header"><h3>New Reservation</h3></div>
+                            <div class="section-card-body">
+                                <div class="form-group"><label class="form-label">Resource Type</label><select id="res-type" class="form-control form-select" onchange="updateResOptions()"><option value="room">Study Room</option><option value="laptop">Laptop</option><option value="calculator">Calculator</option></select></div>
+                                <div class="form-group"><label class="form-label">Select Resource</label><select id="res-resource" class="form-control form-select"></select></div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="res-date" class="form-control"></div>
+                                    <div class="form-group"><label class="form-label">Time Slot</label><select id="res-slot" class="form-control form-select"><option>08:00 – 10:00</option><option>10:00 – 12:00</option><option>12:00 – 14:00</option><option>14:00 – 16:00</option><option>16:00 – 18:00</option><option>18:00 – 20:00</option></select></div>
+                                </div>
+                                <div class="form-group" id="room-size-group" style="display:none;"><label class="form-label">Group Size</label><input type="number" class="form-control" placeholder="We'll match the most suitable room."></div>
+                                <div class="form-group"><label class="form-label">Notes (optional)</label><textarea id="res-notes" class="form-control" rows="3"></textarea></div>
+                                <div class="btn-group"><button class="btn btn-primary" onclick="submitReservation(false)">Reserve</button><button class="btn btn-secondary" onclick="submitReservation(true)">Join Waitlist</button></div>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <div class="section-card-header"><h3>My Reservation Calendar</h3></div>
+                            <div class="section-card-body">
+                                <div id="student-cal" class="cal-wrap"></div>
+                                <div class="cal-legend"><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(232,85,71,.12);"></div> Has reservation</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red);"></div> Selected / Today</div></div>
+                                <div id="student-cal-events" class="cal-events-panel"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- QR -->
+                <section id="student-panel-qr" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>QR Check-In / Check-Out</h2><p>Scan the resource QR code to update status</p></div></div>
+                    <div class="grid-2">
+                        <div class="section-card">
+                            <div class="section-card-body" style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:40px;">
+                                <div class="qr-scanner">
+                                    <div class="qr-frame"><i class="fa-solid fa-qrcode qr-placeholder"></i></div>
+                                    <h3>Scan Resource QR Code</h3>
+                                    <p>Point your camera at the resource barcode</p>
+                                </div>
+                                <div class="form-group" style="width:100%;max-width:300px;"><label class="form-label">Select Resource</label><select id="qr-resource-select" class="form-control form-select"></select></div>
+                                <div class="btn-group"><button class="btn btn-success" onclick="doQRAction('checkin')"><i class="fa-solid fa-check"></i> Check In</button><button class="btn btn-danger" onclick="doQRAction('checkout')"><i class="fa-solid fa-xmark"></i> Check Out</button></div>
+                            </div>
+                        </div>
+                        <div class="section-card"><div class="section-card-header"><h3>QR Activity Log</h3></div><div class="section-card-body table-wrap"><table><thead><tr><th>Time</th><th>Resource</th><th>Action</th></tr></thead><tbody id="qr-log"></tbody></table></div></div>
+                    </div>
+                </section>
+
+                <!-- Notifications -->
+                <section id="student-panel-notifications" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Notifications</h2><p>Your latest alerts and updates</p></div><button class="btn btn-secondary" onclick="markAllRead()">Mark all read</button></div>
+                    <div class="section-card"><div class="section-card-body"><div id="student-notif-list-full" class="notif-list"></div></div></div>
+                </section>
+
+                <!-- Issues -->
+                <section id="student-panel-issues" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Report an Issue</h2><p>Alert staff about damaged or faulty equipment</p></div></div>
+                    <div class="grid-2">
+                        <div class="section-card">
+                            <div class="section-card-header"><h3>Submit Report</h3></div>
+                            <div class="section-card-body">
+                                <div class="form-group"><label class="form-label">Resource</label><select id="issue-resource" class="form-control form-select"></select></div>
+                                <div class="form-group"><label class="form-label">Issue Type</label><select id="issue-type" class="form-control form-select"><option>Hardware Damage</option><option>Software Problem</option><option>Missing Component</option><option>Cleanliness</option><option>Other</option></select></div>
+                                <div class="form-group"><label class="form-label">Description</label><textarea id="issue-desc" class="form-control" rows="4"></textarea></div>
+                                <button class="btn btn-primary" onclick="submitIssue()">Submit Report</button>
+                            </div>
+                        </div>
+                        <div class="section-card"><div class="section-card-header"><h3>My Reports</h3></div><div class="section-card-body"><div id="issues-list" class="issues-list"></div></div></div>
+                    </div>
+                </section>
+
+                <!-- Account Center (FULLY RESTORED) -->
+                <section id="student-panel-account" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Account Center</h2><p>Manage your profile and credentials</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Profile Information</h3><button class="btn btn-primary btn-sm" onclick="saveAccount()">Save Changes</button></div>
+                        <div class="section-card-body">
+                            <div class="account-avatar-big">KM</div>
+                            <p style="margin-bottom:16px; color:var(--text-muted); font-size:13px;">Kavya Menon · Student · STU2024001 <button class="btn btn-ghost btn-xs" style="margin-left:8px;">Change Photo</button></p>
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-control" value="Kavya"></div>
+                                <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-control" value="Menon"></div>
+                                <div class="form-group"><label class="form-label">Student ID</label><input type="text" class="form-control" value="STU2024001" disabled></div>
+                                <div class="form-group"><label class="form-label">Faculty</label><input type="text" class="form-control" value="Faculty of Computing"></div>
+                                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" value="kavya.m@uni.edu"></div>
+                                <div class="form-group"><label class="form-label">Phone</label><input type="text" class="form-control" value="+94 77 123 4567"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Change Password</h3></div>
+                        <div class="section-card-body">
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                                <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                            </div>
+                            <div class="form-group" style="max-width:calc(50% - 8px);"><label class="form-label">Confirm Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                            <button class="btn btn-primary" onclick="showToast('Password updated','success')">Update Password</button>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Active Sessions</h3></div>
+                        <div class="section-card-body table-wrap">
+                            <table>
+                                <thead><tr><th>Device</th><th>Location</th><th>Last Active</th><th></th></tr></thead>
+                                <tbody>
+                                    <tr><td><i class="fa-brands fa-windows" style="margin-right:8px; color:var(--text-muted);"></i> Chrome · Windows <span class="badge badge-available" style="margin-left:8px;">Current</span></td><td>Colombo, LK</td><td>Now</td><td></td></tr>
+                                    <tr><td><i class="fa-brands fa-apple" style="margin-right:8px; color:var(--text-muted);"></i> Safari · iPhone</td><td>Colombo, LK</td><td>2h ago</td><td><button class="btn btn-danger btn-xs">Revoke</button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings (FULLY RESTORED) -->
+                <section id="student-panel-settings" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Settings</h2><p>Customize your Veritas experience</p></div><button class="btn btn-primary btn-sm" onclick="showToast('Settings saved','success')">Save All</button></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Appearance</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Dark Mode</label><p>Switch to a darker interface to reduce eye strain</p></div><label class="toggle"><input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this)"><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Compact Layout</label><p>Reduce spacing for a denser information view</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Reduce Motion</label><p>Minimize animations throughout the interface</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Notifications</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Email Notifications</label><p>Reservation confirmations, reminders, and overdue alerts</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>SMS Alerts</label><p>Urgent notifications via text message</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Waitlist Updates</label><p>Notify me when a waitlisted resource becomes available</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Return Reminders</label><p>Send me a reminder 30 minutes before a resource is due</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Marketing Updates</label><p>News about new library resources and events</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Reservation Preferences</h3></div>
+                        <div class="section-card-body">
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">Default Resource Type</label><select class="form-control form-select"><option>Study Room</option><option>Laptop</option><option>Calculator</option></select></div>
+                                <div class="form-group"><label class="form-label">Default Time Slot</label><select class="form-control form-select"><option>08:00 – 10:00</option><option>10:00 – 12:00</option><option>14:00 – 16:00</option></select></div>
+                            </div>
+                            <div class="form-group" style="max-width:calc(50% - 8px);"><label class="form-label">Default Group Size</label><input type="number" class="form-control" value="4"></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Auto-join Waitlist</label><p>Automatically add me to waitlist if my first choice is unavailable</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Privacy & Data</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Usage Analytics</label><p>Allow Veritas to use my usage data to improve recommendations</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Show Online Status</label><p>Let staff see when I was last active</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                            <div class="btn-group" style="margin-top:16px;">
+                                <button class="btn btn-secondary" onclick="showToast('Data export started','info')">Export My Data</button>
+                                <button class="btn btn-danger" onclick="showToast('Account deletion requires admin approval','warn')">Delete Account</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!--   STAFF PAGE   -->
+    <div id="page-staff" class="page">
+        <nav class="navbar">
+            <button class="nav-sidebar-toggle" onclick="toggleSidebar('staff')"><i class="fa-solid fa-bars"></i></button>
+            <div class="navbar-brand"><i class="fa-solid fa-book-open-reader"></i> <span>Veritas</span> LMS</div>
+            <div class="navbar-spacer"></div>
+            <div class="nav-actions">
+                <button class="notif-btn"><i class="fa-regular fa-bell"></i><span class="notif-badge">5</span></button>
+                <div class="nav-profile">
+                    <button class="nav-profile-btn" onclick="toggleProfileDropdown('staff-profile-dropdown')">
+                        <div class="nav-avatar">LT</div><span class="nav-name">Liam T.</span><i class="fa-solid fa-chevron-down nav-profile-caret"></i>
+                    </button>
+                    <div class="profile-dropdown" id="staff-profile-dropdown">
+                        <div class="profile-dropdown-header"><div class="profile-dropdown-name">Liam Thompson</div><div class="profile-dropdown-role">Library Staff</div></div>
+                        <button class="profile-dropdown-item" onclick="navToPanel('staff','account')"><i class="fa-regular fa-user"></i> Account Center</button>
+                        <button class="profile-dropdown-item" onclick="navToPanel('staff','settings')"><i class="fa-solid fa-gear"></i> Settings</button>
+                        <div class="profile-dropdown-divider"></div>
+                        <button class="profile-dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="dashboard-shell">
+            <aside id="staff-sidebar" class="sidebar">
+                <div class="sidebar-section"><div class="sidebar-label">Operations</div>
+                    <a class="sidebar-item active" data-panel="overview" onclick="navToPanel('staff','overview',this)"><i class="fa-solid fa-grid-2 sidebar-icon"></i> Overview</a>
+                    <a class="sidebar-item" data-panel="manual" onclick="navToPanel('staff','manual',this)"><i class="fa-solid fa-arrow-right-arrow-left sidebar-icon"></i> Manual Check-In/Out</a>
+                    <a class="sidebar-item" data-panel="overdue" onclick="navToPanel('staff','overdue',this)"><i class="fa-solid fa-clock-rotate-left sidebar-icon"></i> Overdue Items</a>
+                    <a class="sidebar-item" data-panel="overrides" onclick="navToPanel('staff','overrides',this)"><i class="fa-solid fa-wrench sidebar-icon"></i> Override Requests</a>
+                    <a class="sidebar-item" data-panel="utilization" onclick="navToPanel('staff','utilization',this)"><i class="fa-solid fa-chart-simple sidebar-icon"></i> Utilization History</a>
+                </div>
+                <div class="sidebar-section"><div class="sidebar-label">Account</div>
+                    <a class="sidebar-item" data-panel="account" onclick="navToPanel('staff','account',this)"><i class="fa-regular fa-user sidebar-icon"></i> Account Center</a>
+                    <a class="sidebar-item" data-panel="settings" onclick="navToPanel('staff','settings',this)"><i class="fa-solid fa-sliders sidebar-icon"></i> Settings</a>
+                </div>
+            </aside>
+            <div id="staff-sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+            <main class="main-content">
+                <section id="staff-panel-overview" class="panel active">
+                    <div class="page-header"><div class="page-header-left"><h2>Staff Dashboard</h2><p>Library operations overview</p></div></div>
+                    <div class="cards-grid">
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#2e7d52;"><i class="fa-solid fa-circle-check"></i></div><div class="stat-card-val">34</div><div class="stat-card-label">Active Loans</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#b93025;"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="stat-card-val" id="overdue-count-stat">5</div><div class="stat-card-label">Overdue Items</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#c97b22;"><i class="fa-solid fa-wrench"></i></div><div class="stat-card-val" id="override-count-stat">3</div><div class="stat-card-label">Pending Overrides</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#E85547;"><i class="fa-solid fa-chart-pie"></i></div><div class="stat-card-val">91%</div><div class="stat-card-label">Utilization Today</div><div class="stat-card-sub"><i class="fa-solid fa-arrow-up"></i> 6% vs last week</div></div>
+                    </div>
+                    <div class="section-card"><div class="section-card-header"><h3>Today's Activity Log</h3></div><div class="section-card-body table-wrap"><table><thead><tr><th>Time</th><th>Student</th><th>Resource</th><th>Action</th><th>Method</th></tr></thead><tbody id="staff-activity-body"></tbody></table></div></div>
+                </section>
+
+                <section id="staff-panel-manual" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Manual Check-In / Check-Out</h2><p>Process walk-in requests at the desk</p></div></div>
+                    <div class="grid-2">
+                        <div class="section-card"><div class="section-card-header"><h3>Process Transaction</h3></div><div class="section-card-body">
+                            <div class="form-group"><label class="form-label">Student ID</label><input type="text" id="staff-student-id" class="form-control" placeholder="e.g. STU2024001"></div>
+                            <div class="form-group"><label class="form-label">Resource</label><select id="staff-resource-select" class="form-control form-select"></select></div>
+                            <div class="btn-group"><button class="btn btn-success" onclick="staffCheckAction('in')"><i class="fa-solid fa-check"></i> Check In</button><button class="btn btn-danger" onclick="staffCheckAction('out')"><i class="fa-solid fa-xmark"></i> Check Out</button></div>
+                        </div></div>
+                        <div class="section-card"><div class="section-card-header"><h3>Current Loans</h3></div><div class="section-card-body table-wrap"><table><thead><tr><th>Student</th><th>Resource</th><th>Due</th><th>Status</th></tr></thead><tbody id="current-loans-body"></tbody></table></div></div>
+                    </div>
+                </section>
+
+                <section id="staff-panel-overdue" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Overdue Items</h2><p>Items past their return deadline</p></div></div>
+                    <div class="section-card"><div class="section-card-header"><h3>Overdue List</h3></div><div class="section-card-body table-wrap"><table><thead><tr><th>Student</th><th>Resource</th><th>Due Date</th><th>Days Overdue</th><th>Actions</th></tr></thead><tbody id="overdue-body"></tbody></table></div></div>
+                </section>
+
+                <section id="staff-panel-overrides" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Override Requests</h2><p>Manual conflict resolutions and special approvals</p></div></div>
+                    <div class="section-card"><div class="section-card-header"><h3>Pending Requests</h3></div><div class="section-card-body table-wrap"><table><thead><tr><th>Student</th><th>Resource</th><th>Reason</th><th>Requested</th><th>Actions</th></tr></thead><tbody id="override-body"></tbody></table></div></div>
+                </section>
+
+                <section id="staff-panel-utilization" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Utilization History</h2><p>Full calendar view of all resource usage across the library</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Library Calendar</h3><div class="filter-group"><select id="staff-cal-filter" class="form-control form-select" onchange="renderStaffCalendar()"><option value="all">All Resources</option><option value="room">Study Rooms</option><option value="laptop">Laptops</option><option value="calculator">Calculators</option></select></div></div>
+                        <div class="section-card-body">
+                            <div id="staff-cal" class="cal-wrap"></div>
+                            <div class="cal-legend"><div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(232,85,71,.12);"></div> Has activity</div><div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red);"></div> Selected</div></div>
+                            <div id="staff-cal-events" class="cal-events-panel"></div>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="section-card"><div class="section-card-header"><h3>Utilization Summary</h3></div><div class="section-card-body"><div id="staff-utilization-chart" class="chart-bar-wrap"></div></div></div>
+                        <div class="section-card"><div class="section-card-header"><h3>All Transactions</h3></div><div class="section-card-body table-wrap"><table><thead><tr><th>Date</th><th>Student</th><th>Resource</th><th>Action</th></tr></thead><tbody id="all-transactions-body"></tbody></table></div></div>
+                    </div>
+                </section>
+
+                <!-- Staff Account (FULLY RESTORED) -->
+                <section id="staff-panel-account" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Account Center</h2><p>Manage your staff profile</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Profile Information</h3><button class="btn btn-primary btn-sm" onclick="showToast('Profile saved','success')">Save</button></div>
+                        <div class="section-card-body">
+                            <div class="account-avatar-big">LT</div>
+                            <p style="margin-bottom:16px; color:var(--text-muted); font-size:13px;">Liam Thompson · Library Staff · ID: STAFF0042</p>
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-control" value="Liam"></div>
+                                <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-control" value="Thompson"></div>
+                                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" value="liam.t@uni.edu"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Change Password</h3></div>
+                        <div class="section-card-body">
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                                <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                            </div>
+                            <button class="btn btn-primary" onclick="showToast('Password updated','success')">Update Password</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Staff Settings (FULLY RESTORED) -->
+                <section id="staff-panel-settings" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Settings</h2></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Appearance</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Dark Mode</label><p>Switch to a darker interface</p></div><label class="toggle"><input type="checkbox" id="staff-dark-toggle" onchange="toggleDarkMode(this)"><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Compact Layout</label><p>Denser information view</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Notifications</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Email Alerts</label><p>Overdue and override notifications</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>SMS Alerts</label><p>Urgent staff notifications</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!--   ADMIN PAGE   -->
+    <div id="page-admin" class="page">
+        <nav class="navbar">
+            <button class="nav-sidebar-toggle" onclick="toggleSidebar('admin')"><i class="fa-solid fa-bars"></i></button>
+            <div class="navbar-brand"><i class="fa-solid fa-book-open-reader"></i> <span>Veritas</span> LMS</div>
+            <div class="navbar-spacer"></div>
+            <div class="nav-actions">
+                <button class="notif-btn"><i class="fa-regular fa-bell"></i><span class="notif-badge">1</span></button>
+                <div class="nav-profile">
+                    <button class="nav-profile-btn" onclick="toggleProfileDropdown('admin-profile-dropdown')">
+                        <div class="nav-avatar">DN</div><span class="nav-name">Dr. Nair</span><i class="fa-solid fa-chevron-down nav-profile-caret"></i>
+                    </button>
+                    <div class="profile-dropdown" id="admin-profile-dropdown">
+                        <div class="profile-dropdown-header"><div class="profile-dropdown-name">Dr. Anitha Nair</div><div class="profile-dropdown-role">Library Administrator</div></div>
+                        <button class="profile-dropdown-item" onclick="navToPanel('admin','account')"><i class="fa-regular fa-user"></i> Account Center</button>
+                        <button class="profile-dropdown-item" onclick="navToPanel('admin','settings')"><i class="fa-solid fa-gear"></i> Settings</button>
+                        <div class="profile-dropdown-divider"></div>
+                        <button class="profile-dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="dashboard-shell">
+            <aside id="admin-sidebar" class="sidebar">
+                <div class="sidebar-section"><div class="sidebar-label">Analytics</div>
+                    <a class="sidebar-item active" data-panel="analytics" onclick="navToPanel('admin','analytics',this)"><i class="fa-solid fa-chart-line sidebar-icon"></i> Analytics</a>
+                    <a class="sidebar-item" data-panel="fair-usage" onclick="navToPanel('admin','fair-usage',this)"><i class="fa-solid fa-scale-balanced sidebar-icon"></i> Fair Usage Policy</a>
+                    <a class="sidebar-item" data-panel="priority" onclick="navToPanel('admin','priority',this)"><i class="fa-solid fa-bullseye sidebar-icon"></i> Priority Engine</a>
+                </div>
+                <div class="sidebar-section"><div class="sidebar-label">Account</div>
+                    <a class="sidebar-item" data-panel="account" onclick="navToPanel('admin','account',this)"><i class="fa-regular fa-user sidebar-icon"></i> Account Center</a>
+                    <a class="sidebar-item" data-panel="settings" onclick="navToPanel('admin','settings',this)"><i class="fa-solid fa-sliders sidebar-icon"></i> Settings</a>
+                </div>
+            </aside>
+            <div id="admin-sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+            <main class="main-content">
+                <section id="admin-panel-analytics" class="panel active">
+                    <div class="page-header"><div class="page-header-left"><h2>Analytics Dashboard</h2><p>Usage trends and resource insights</p></div><button class="btn btn-secondary" onclick="refreshCharts()"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+                    <div class="cards-grid">
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#E85547;"><i class="fa-regular fa-calendar-check"></i></div><div class="stat-card-val">247</div><div class="stat-card-label">Bookings This Week</div><div class="stat-card-sub"><i class="fa-solid fa-arrow-up"></i> 18% vs last week</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#2e7d52;"><i class="fa-solid fa-gauge-high"></i></div><div class="stat-card-val">91%</div><div class="stat-card-label">Avg Utilization</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#b93025;"><i class="fa-solid fa-circle-xmark"></i></div><div class="stat-card-val">12</div><div class="stat-card-label">Cancellations</div></div>
+                        <div class="stat-card"><div class="stat-card-icon" style="color:#c97b22;"><i class="fa-solid fa-clock"></i></div><div class="stat-card-val">7</div><div class="stat-card-label">Overdue Items</div></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="section-card"><div class="section-card-header"><h3>Bookings by Resource Type</h3></div><div class="section-card-body"><div id="chart-resource-type" class="chart-bar-wrap"></div></div></div>
+                        <div class="section-card">
+                            <div class="section-card-header"><h3>Overall Utilization</h3></div>
+                            <div class="section-card-body">
+                                <div class="donut-wrap">
+                                    <div class="donut">
+                                        <svg width="120" height="120" viewBox="0 0 120 120">
+                                            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="16"/>
+                                            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--red)" stroke-width="16" stroke-dasharray="285 314" stroke-linecap="round"/>
+                                        </svg>
+                                        <div class="donut-center">91%<small>Used</small></div>
+                                    </div>
+                                    <div class="donut-legend">
+                                        <div class="donut-legend-item"><div class="donut-legend-dot" style="background:var(--red);"></div> Occupied (91%)</div>
+                                        <div class="donut-legend-item"><div class="donut-legend-dot" style="background:var(--border);"></div> Available (9%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="section-card"><div class="section-card-header"><h3>Daily Bookings — This Week</h3></div><div class="section-card-body"><div id="chart-daily" class="chart-bar-wrap"></div></div></div>
+                        <div class="section-card"><div class="section-card-header"><h3>Peak Hours</h3></div><div class="section-card-body"><div id="chart-hours" class="chart-bar-wrap"></div></div></div>
+                    </div>
+                </section>
+
+                <section id="admin-panel-fair-usage" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Fair Usage Policy</h2><p>Control how students access and consume resources</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Policy Toggles</h3><button class="btn btn-primary btn-sm" onclick="saveFairUsage()">Save Settings</button></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Limit Continuous Bookings</label><p>Prevent students from booking the same resource for more than 2 consecutive slots</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Exam Period Priority</label><p>Automatically boost priority scores for students with exams within 3 days</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Auto-Release Unused Reservations</label><p>Release a reservation if the student does not check in within 15 minutes</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Restrict Overdue Users</label><p>Block new bookings for students with unreturned overdue items</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Double-Booking Prevention</label><p>Hard-block conflicting reservations for the same time slot</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Usage Limits</h3></div>
+                        <div class="section-card-body">
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">Max daily room bookings per student</label><input type="number" class="form-control" value="3"></div>
+                                <div class="form-group"><label class="form-label">Max simultaneous loans per student</label><input type="number" class="form-control" value="2"></div>
+                            </div>
+                            <div class="form-group" style="max-width:calc(50% - 8px);"><label class="form-label">Auto-release timeout (minutes)</label><input type="number" class="form-control" value="15"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="admin-panel-priority" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Priority Allocation Engine</h2><p>Tune the scoring weights for the waitlist algorithm</p></div></div>
+                    <div class="grid-2">
+                        <div class="section-card">
+                            <div class="section-card-header"><h3>Scoring Weights</h3><button class="btn btn-primary btn-sm" onclick="savePrioritySettings()">Apply Settings</button></div>
+                            <div class="section-card-body">
+                                <div class="weight-card"><label>Exam Proximity Score <span id="lbl-exam">70</span></label><input type="range" min="0" max="100" value="70" oninput="document.getElementById('lbl-exam').textContent=this.value; updateScoreDemo()"></div>
+                                <div class="weight-card"><label>Waiting Time Factor <span id="lbl-wait">50</span></label><input type="range" min="0" max="100" value="50" oninput="document.getElementById('lbl-wait').textContent=this.value; updateScoreDemo()"></div>
+                                <div class="weight-card"><label>Excess Usage Penalty <span id="lbl-penalty">30</span></label><input type="range" min="0" max="100" value="30" oninput="document.getElementById('lbl-penalty').textContent=this.value; updateScoreDemo()"></div>
+                                
+                                <div class="form-group" style="margin-top:16px;">
+                                    <label class="form-label">Exam Proximity Threshold (days)</label>
+                                    <select class="form-control form-select">
+                                        <option>1 day</option><option selected>2 days</option><option>3 days</option><option>5 days</option><option>7 days</option>
+                                    </select>
+                                </div>
+
+                                <div class="score-demo">
+                                    <p style="font-size:11px; color:#6e7282; margin-bottom:12px; font-family:var(--font);">Example calculation for a student with an exam in 2 days, waiting 40 minutes.</p>
+                                    <div class="score-demo-line">examScore = <span id="sd-exam">70</span> × 0.9 = <span id="sd-exam-val">63.0</span></div>
+                                    <div class="score-demo-line">waitScore = <span id="sd-wait">50</span> × 0.7 = <span id="sd-wait-val">35.0</span></div>
+                                    <div class="score-demo-line">usagePenalty = <span id="sd-pen">30</span> × 0.2 = <span id="sd-pen-val">6.0</span></div>
+                                    <div class="score-total">priorityScore = <b id="sd-total">92.0</b></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <div class="section-card-header"><h3>Waitlist Preview</h3></div>
+                            <div class="section-card-body table-wrap"><table><thead><tr><th>#</th><th>Student</th><th>Score</th><th>Reason</th></tr></thead><tbody id="waitlist-preview-body"></tbody></table></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Admin Account (FULLY RESTORED) -->
+                <section id="admin-panel-account" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Account Center</h2><p>Manage your administrator profile</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Profile Information</h3><button class="btn btn-primary btn-sm" onclick="showToast('Profile saved','success')">Save</button></div>
+                        <div class="section-card-body">
+                            <div class="account-avatar-big">DN</div>
+                            <p style="margin-bottom:16px; color:var(--text-muted); font-size:13px;">Dr. Anitha Nair · Library Administrator</p>
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-control" value="Anitha"></div>
+                                <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-control" value="Nair"></div>
+                                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" value="anitha.n@uni.edu"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Change Password</h3></div>
+                        <div class="section-card-body">
+                            <div class="account-info-grid">
+                                <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                                <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-control" placeholder="••••••••"></div>
+                            </div>
+                            <button class="btn btn-primary" onclick="showToast('Password updated','success')">Update Password</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Admin Settings (FULLY RESTORED) -->
+                <section id="admin-panel-settings" class="panel">
+                    <div class="page-header"><div class="page-header-left"><h2>Settings</h2><p>System-wide and personal preferences</p></div></div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>Appearance</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Dark Mode</label><p>Switch to a darker interface</p></div><label class="toggle"><input type="checkbox" id="admin-dark-toggle" onchange="toggleDarkMode(this)"><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Compact Layout</label><p>Denser information view</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header"><h3>System Settings</h3></div>
+                        <div class="section-card-body">
+                            <div class="toggle-row"><div class="toggle-info"><label>Maintenance Mode</label><p>Temporarily disable all new bookings</p></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                            <div class="toggle-row"><div class="toggle-info"><label>Analytics Collection</label><p>Collect anonymized usage data</p></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
